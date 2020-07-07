@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login example</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+</head>
+<script>
+    $(document).ready(function () {
+        // If index is called from facebook authentication, we save the token in local storage
+        const urlParams = new URLSearchParams(window.location.search);
+        const facebookToken = urlParams.get('token');
+        if (facebookToken && !localStorage.getItem('facebookToken')) {
+            localStorage.setItem('facebookToken', facebookToken)
+        }
+
+        // Normal login request
+        $("#normalLoginForm").on("submit", (evt) => {
+            evt.preventDefault();
+            const data = $("#normalLoginForm").serializeArray();
+            const obj = JSON.parse(JSON.stringify(data));
+            const usernameAndPassword = {
+                "username": obj[0]["value"],
+                "password": obj[1]["value"],
+            }
+            fetch("https://localhost:3000/users/login", {
+                mode: "cors",
+                method: "POST",
+                body: JSON.stringify(usernameAndPassword),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+            }).then(async (content) => {
+                const response = await content.json()
+                if (response.success) {
+                    localStorage.setItem('normalToken', response.token)
+                    $("#responseParagraph").prepend('<p>Normal authentication was successful, you can access the protected route</p>')
+                } else {
+                    $("#responseParagraph").prepend('<p>Incorrect credentials</p>')
+                }
+            }).catch((error) => {
+                $("#responseParagraph").prepend('<p>Use a valid token or login</p>')
+                console.log(error)
+            })
+        })
+
+        // Protected route request
+        $("#protectedRouteForm").on("submit", (evt) => {
+            evt.preventDefault();
+            if (localStorage.getItem('normalToken') === null) {
+                $("#responseParagraph").prepend('<p>Please login to access protected route</p>')
+                return
+            }
+            fetch("https://localhost:3000/users/protected", {
+                mode: "cors",
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': localStorage.getItem('normalToken')
+                },
+            }).then(async (content) => {
+                const response = await content.json()
+                if (response.success) {
+                    $("#responseParagraph").prepend(`<p>${response.msg}</p>`)
+                } else {
+                    $("#responseParagraph").prepend('<p>Use a valid token or login</p>')
+                }
+            }).catch((error) => {
+                $("#responseParagraph").prepend('<p>Use a valid token or login</p>')
+                console.log(error)
+            })
+        })
+
+        // Facebook login request
+        $("#facebookLoginForm").on("submit", (evt) => {
+            evt.preventDefault();
+            window.location = "https://localhost:3000/users/auth/facebook";
+        })
+
+        // Protected facebook route request
+        $("#protectedFacebookRouteForm").on("submit", (evt) => {
+            evt.preventDefault();
+            if (localStorage.getItem('facebookToken') === null) {
+                $("#responseParagraph").prepend('<p>Please login with facebook to access facebook route</p>')
+                return
+            }
+            fetch("https://localhost:3000/users/facebook-route", {
+                mode: "cors",
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': localStorage.getItem('facebookToken')
+                },
+            }).then(async (content) => {
+                const response = await content.json()
+                if (response.success) {
+                    $("#responseParagraph").prepend(`<p>${response.msg}</p>`)
+                } else {
+                    $("#responseParagraph").prepend('<p>Use a valid token or login</p>')
+                }
+            }).catch((error) => {
+                console.log(error)
+                $("#responseParagraph").prepend('<p>Use a valid token or login</p>')
+            })
+        })
+    });
+</script>
+
+<body>
+    <form method="POST" id="normalLoginForm">
+        <p>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Username">
+        </p>
+        <p>
+            <label for="password">Password</label>
+            <input type="text" id="password" name="password" placeholder="password">
+        </p>
+        <button type="submit">Enter with Account</button>
+    </form>
+    
+    <form method="POST" id="facebookLoginForm">
+        <p>
+            <button type="submit">Enter with Facebook</button>
+        </p>
+    </form>
+    
+    <form method="GET" id="protectedRouteForm">
+        <p>Visit normal auth protected route</p>
+        <button type="submit">Go to</button>
+    </form>
+    
+    <form method="GET" id="protectedFacebookRouteForm">
+        <p>Visit facebook auth protected route</p>
+        <button type="submit">Go to</button>
+    </form>
+    <p id="responseParagraph"></p>
+</body>
+
+</html>
