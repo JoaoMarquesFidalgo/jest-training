@@ -1,8 +1,5 @@
 import { User } from '@models/user'
 import { UserTest, UserTestModel } from '@models/UserTest'
-// The first param is a description of what the test should do
-// The second param is the test itself
-
 import * as faker from 'faker/locale/pt_BR'
 import mongoose from 'mongoose'
 import request from 'supertest'
@@ -14,6 +11,13 @@ let connection: typeof mongoose
 
 // The first param is a description of what the test should do
 // The second param is the test itself
+
+/**
+ *
+ *
+ *
+ *
+ */
 
 describe('User Model', () => {
   beforeAll(async () => {
@@ -79,7 +83,12 @@ describe('User Model', () => {
   })
 })
 
-// /////////////////////////////////////////////////////////////
+/**
+ *
+ *
+ *
+ *
+ */
 
 describe('Authentication', () => {
   beforeAll(async () => {

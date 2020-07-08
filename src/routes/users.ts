@@ -1,7 +1,7 @@
-import passport from 'passport'
-import { Request, Response, NextFunction } from 'express'
 import * as UserController from '@controllers/userController'
 import * as utils from '@lib/utils'
+import { NextFunction, Request, Response } from 'express'
+import passport from 'passport'
 
 const router = require('express').Router()
 

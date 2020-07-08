@@ -23,7 +23,6 @@ export function findUser (req: Request, res: Response, next: NextFunction) {
       return res.status(401).json({ success: false, msg: 'Wrong credentials' })
     }
   }).catch((err: any) => {
-    console.log('error ', err)
     next(err)
   })
 }
